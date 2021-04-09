@@ -4,10 +4,9 @@ services:
   igs.techtest:
     image: igstechtest/api
     build:
-      context: .
-      dockerfile: IGS.TechTest/Dockerfile
+      context: ./IGS.TechTest
+      dockerfile: Dockerfile
     ports:
-      - "5001:443"
       - "5000:80"
     depends_on:
       - mssqldb
@@ -15,3 +14,5 @@ services:
     build:
       context: ./db
       dockerfile: Dockerfile
+    ports:
+      - "1433:1433"

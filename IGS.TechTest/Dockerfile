@@ -1,23 +1,16 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
-WORKDIR /app
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build-env
 EXPOSE 80
 EXPOSE 443
-
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
-WORKDIR /src
-COPY ["IGS.TechTest/IGS.TechTest.csproj", "IGS.TechTest/"]
-RUN dotnet restore "IGS.TechTest/IGS.TechTest.csproj"
-COPY . .
-WORKDIR "/src/IGS.TechTest"
-RUN dotnet build "IGS.TechTest.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "IGS.TechTest.csproj" -c Release -o /app/publish
-
-FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY *.csproj ./
+RUN dotnet restore
+COPY . ./
+RUN dotnet publish -c Release -o out
 
-CMD ["dotnet", "IGS.TechTest.dll"]
+FROM mcr.microsoft.com/dotnet/sdk:5.0
+WORKDIR /app
+COPY --from=build-env /app/out .
+
+ENTRYPOINT ["dotnet", "IGS.TechTest.dll"]
